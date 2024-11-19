@@ -35,17 +35,20 @@ namespace PROJETO_PAN.Service
                     if (usuarioBanco == null)
                     {
                         response.Mensagem = "Nenhum Usuario localizado!";
-                        response.Status = false;
+                        response.Status = System.Net.HttpStatusCode.NotFound;
                         return response;
                     }
                     response.dados = usuarioBanco;
                     response.Mensagem = "Usuario Localizado Com Sucesso!";
+                    response.Status = System.Net.HttpStatusCode.OK;
                 }
                 return response;
             }
             catch (Exception)
             {
-                throw;
+                response.Mensagem = "Ocorreu um erro no processo";
+                response.Status = System.Net.HttpStatusCode.InternalServerError;
+                return response;
             }
 		}
 
@@ -61,19 +64,21 @@ namespace PROJETO_PAN.Service
                     if (usuariosBanco.Count() == 0)
                     {
                         response.Mensagem = "Nenhum usuario Localizado!";
-                        response.Status = false;
+                        response.Status = System.Net.HttpStatusCode.NotFound;
                         return response;
                     }
                     var usuarioMapeado = _mapper.Map<List<UsuarioListarDTO>>(usuariosBanco);
                     response.dados = usuarioMapeado;
                     response.Mensagem = "Usuários Localizados com sucesso!";
+                    response.Status = System.Net.HttpStatusCode.OK;
                 }
                 return response;
             }
             catch (Exception)
             {
-
-                throw;
+                response.Mensagem = "Ocorreu um erro no processo";
+                response.Status = System.Net.HttpStatusCode.InternalServerError;
+                return response;
             }
            
         }
@@ -86,27 +91,34 @@ namespace PROJETO_PAN.Service
             {
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    var usuariosBanco = await connection.ExecuteAsync(" insert into Usuarios (NomeCompleto,Email,CPF,situacao) values(@Nomecompleto, @Email, @CPF, @situacao)", usuarioCriarDTO);
+                    var cpfExists = await connection.ExecuteScalarAsync<bool>("select case when exists (select 1 from usuarios where cpf = @cpf) then 1 else 0 end",new { CPF = usuarioCriarDTO.CPF });
+                    if (cpfExists)
+                    {
+                        response.Mensagem = "CPF já cadastrado no sistema.";
+                        response.Status = System.Net.HttpStatusCode.Conflict;
+                        return response;
+                    }
+                    var usuariosBanco = await connection.ExecuteAsync("insert into usuarios (nomecompleto, email, cpf, situacao) values (@nomecompleto, @email, @cpf, @situacao)",usuarioCriarDTO);
                     if (usuariosBanco == 0)
                     {
                         response.Mensagem = "Ocorreu um erro ao realizar o registro!";
-                        response.Status = false;
+                        response.Status = System.Net.HttpStatusCode.NotFound;
                         return response;
                     }
                     var usuarios = await ListarUsuarios(connection);
                     var usuariosMapeados = _mapper.Map<List<UsuarioListarDTO>>(usuarios);
                     response.dados = usuariosMapeados;
-                    response.Mensagem = "Usuarios Listados com sucesso";
+                    response.Mensagem = "Usuário criado com sucesso.";
+                    response.Status = System.Net.HttpStatusCode.OK;
                 }
                 return response;
             }
             catch (Exception)
             {
-
-                throw;
+                response.Mensagem = "Ocorreu um erro no processo";
+                response.Status = System.Net.HttpStatusCode.InternalServerError;
+                return response;
             }
-           
-
         }
 
 
@@ -127,20 +139,22 @@ namespace PROJETO_PAN.Service
                     if (usuariosBanco == 0)
                     {
                         response.Mensagem = "Ocorreu um erro ao realizar a edição!";
-                        response.Status = false;
+                        response.Status = System.Net.HttpStatusCode.NotFound;
                         return response;
                     }
                     var usuarios = await ListarUsuarios(connection);
                     var usuariosMapeados = _mapper.Map<List<UsuarioListarDTO>>(usuarios);
                     response.dados = usuariosMapeados;
                     response.Mensagem = "Usuarios listados com sucesso!";
+                    response.Status = System.Net.HttpStatusCode.OK;
                 }
                 return response;
             }
             catch (Exception)
             {
-
-                throw;
+                response.Mensagem = "Ocorreu um erro no processo";
+                response.Status = System.Net.HttpStatusCode.InternalServerError;
+                return response;
             }
             
 		}
@@ -157,20 +171,22 @@ namespace PROJETO_PAN.Service
                     if (usuarioBanco == 0)
                     {
                         response.Mensagem = "Não existe esse Usuario no Banco!";
-                        response.Status = false;
+                        response.Status = System.Net.HttpStatusCode.NotFound;
                         return response;
                     }
                     var usuarios = await ListarUsuarios(connection);
                     var usuariosMapeados = _mapper.Map<List<UsuarioListarDTO>>(usuarios);
                     response.dados = usuariosMapeados;
                     response.Mensagem = "Usuario Listados com sucesso";
+                    response.Status = System.Net.HttpStatusCode.OK;
                 }
                 return response;
             }
             catch (Exception)
             {
-
-                throw;
+                response.Mensagem = "Ocorreu um erro no processo";
+                response.Status = System.Net.HttpStatusCode.InternalServerError;
+                return response;
             }
            
         

@@ -22,7 +22,7 @@ namespace PROJETO_PAN.Controllers
         public async Task<IActionResult> BuscarUsuarios()
         {
             var usuarios = await _usuarioInterface.BuscarUsuarios();
-            if (usuarios.Status == false)
+            if (usuarios.Status == System.Net.HttpStatusCode.NotFound)
             {
                 return NotFound(usuarios);
             }
@@ -33,7 +33,7 @@ namespace PROJETO_PAN.Controllers
         public async Task<IActionResult> BuscarUsuarioPorId(int usuarioId)
         {
             var usuario = await _usuarioInterface.BuscarUsuarioPorId(usuarioId);
-            if (usuario.Status == false)
+            if (usuario.Status == System.Net.HttpStatusCode.NotFound)
             {
                 return NotFound(usuario);
             }
@@ -44,7 +44,7 @@ namespace PROJETO_PAN.Controllers
         public async Task<IActionResult> CriarUsuario(UsuarioCriarDTO usuarioCriarDTO)
         {
             var usuarios = await _usuarioInterface.CriarUsuario(usuarioCriarDTO);
-			if (usuarios.Status == false)
+			if (usuarios.Status == System.Net.HttpStatusCode.NotFound)
 			{
 				return BadRequest(usuarios);
 			}
@@ -55,7 +55,7 @@ namespace PROJETO_PAN.Controllers
         public async Task<IActionResult> EditarUsuario(UsuarioListarDTO usuarioListarDTO)
         {
             var usuarios = await _usuarioInterface.EditarUsuario(usuarioListarDTO);
-            if (usuarios.Status == false)
+            if (usuarios.Status == System.Net.HttpStatusCode.NotFound)
             {
                 return BadRequest(usuarios);
             }
@@ -66,7 +66,7 @@ namespace PROJETO_PAN.Controllers
 		public async Task<IActionResult> RemoverUsuario(int usuarioId)
 		{
 			var usuarios = await _usuarioInterface.RemoverUsuario(usuarioId);
-			if (usuarios.Status == false)
+			if (usuarios.Status == System.Net.HttpStatusCode.NotFound)
 			{
 				return BadRequest(usuarios);
 			}
